@@ -2,7 +2,7 @@ const express=require("express");
 
 const book=express();
 book.use(express.json());
-const database=require("./database");
+let database=require("./database");
 /*
 Route   /
 Description  Get all the books in the database
@@ -178,6 +178,73 @@ book.put("/publication/update/book/:isbn",(req,res)=>{
     return res.json({data:database.books,pudh:database.publication});
 });
 
+/*
+Route   /book/delete/:isbn
+Description  updating the publications and the pushing id of publication into book api
+parameter   ISBN
+methods    delete
+Access     Public
+*/
+book.delete("/book/delete/:isbn",(req,res)=>{
+    const app=database.books.filter(
+        (bk)=>bk.ISBN !== req.params.isbn
+    );
+    database.books=app;
+    return res.json({books:database.books});
+});
 
+/*
+Route   /book/delete/author/:isbn
+Description  deleting the author in book and update author api
+parameter   ISBN
+methods    delete
+Access     Public
+*/
+
+book.delete("/book/delete/author/:isbn/:id",(req,res)=>{
+    database.books.forEach((bk)=>{
+        if(bk.ISBN===req.params.isbn){
+            const ath=bk.author.filter((jo)=>jo!==parseInt(req.params.id));
+            bk.author=ath;
+            return;
+        }
+    
+    });
+
+    database.author.forEach((jh)=>{
+        if(jh.id===parseInt(req.params.id)){
+            const ik=jh.books.filter((oo)=>oo!==req.params.isbn);
+            jh.books=ik;
+            return ;
+        }
+    });
+    return res.json({books:database.books,author:database.author});
+})
+/*
+Route   /book/delete/author/:isbn
+Description  deleting the author in book and update author api
+parameter   ISBN
+methods    delete
+Access     Public
+*/
+book.delete("/publication/delete/:isbn/:pubid",(req,res)=>{
+    database.publication.forEach((oo)=>{
+        if(oo.id===parseInt(req.params.pubid)){
+            const jk=oo.books.filter((pk)=>pk!==req.params.isbn);
+            oo.books=jk;
+            return;
+        }
+
+
+    });
+
+    database.books.forEach((ip)=>{
+        if(ip.ISBN===req.params.isbn){
+            ip.publish=0;
+            return;
+        }
+    });
+    return res.json({books:database.books,ph:database.publication});
+})
 
 book.listen(3000,()=>console.log("Hello AP"));

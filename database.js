@@ -8,7 +8,19 @@ const books=[
     language:"en",
     category:["edutech","programmming"],
     publish:[1],
-}];
+    },
+    {
+        ISBN:"12345Book",
+        title:"Getting Started with C++",
+        pubdate:"12-07-2023",
+        author:[2],
+        numpage:209,
+        language:"en",
+        category:["edutech","programmming"],
+        publish:[2],
+    }
+
+];
 
 
 const author=[{
@@ -19,7 +31,7 @@ const author=[{
 {
     id:2,
     name:"Hemanth",
-    books:["12Book"],
+    books:["12345Book"],
 }
 ];
 
