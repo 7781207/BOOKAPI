@@ -24,7 +24,7 @@ methods    get
 Access     Public
 */
 book.get("/is/:isbn",(req,res)=>{
-    const getbook=database.books.filter((stu)=>stu.ISBN===req.params.isbn);
+    const getbook=database.books.filter((stu)=>stu.ISBN === req.params.isbn);
     if(getbook.length===0){
         return res.json({"error":`No book with the given ISBN ${req.params.isbn} is fount`});
     }
@@ -98,6 +98,84 @@ book.get("/pubbs/:id",(req,res)=>{
         return res.json({"error":`No publications with the given id ${req.params.id} is fount`});
     }
     return res.json({publications:getbook});
+});
+
+//post
+//Add a book
+book.post("/bookd/add",(req,res)=>{
+    const {newbook}=req.body;
+    database.books.push(newbook);
+    return res.json({books:database.books});
+});
+
+
+book.post("/authors/add",(req,res)=>{
+    const { newauthor }=req.body;
+    database.author.push(newauthor);
+    return res.json({author:database.author});
+});
+
+
+book.post("/pubbi/add",(req,res)=>{
+    const {newpub}=req.body;
+    database.publication.push(newpub);
+    return res.json({author:database.publication});
+});
+
+//PUT
+book.put("/book/update/title/:isbn",(req,res)=>{
+
+    database.books.forEach((bk)=>{
+      if(bk.ISBN === req.params.isbn) {
+        bk.title = req.body.newbooktitle;
+        console.log("its running");
+        return;
+        }
+    });
+
+    return res.json({books:database.books});
+
+});
+//put 
+//update or add new author
+book.put("/book/update/author/:isbn",(req,res)=>{
+    database.books.forEach((ivb)=>{
+        if(ivb.ISBN===req.params.isbn){
+            return ivb.author.push(parseInt(req.body.newauthorid));
+        }
+    });
+    database.author.forEach((abc)=>{
+        if(abc.id === parseInt(req.body.newauthorid)){
+            return abc.books.push(req.params.isbn);
+        }
+    });
+    return res.json({books:database.books,authors:database.author});
+});
+
+/*
+Route   /publication/updata/book
+Description  updating the publications and the pushing id of publication into book api
+parameter   ISBN
+methods    updata
+Access     Public
+*/
+
+book.put("/publication/update/book/:isbn",(req,res)=>{
+    //update the publication datatype
+    database.publication.forEach((pub)=>{
+        if(pub.id===req.body.pubbid){
+            return pub.books.push(req.params.isbn);
+            
+        }
+
+    });
+    database.books.forEach((hpo)=>{
+        if(hpo.ISBN===req.params.isbn){
+            hpo.publish.push(req.body.pubbid);
+            return;
+        }
+    });
+    return res.json({data:database.books,pudh:database.publication});
 });
 
 
