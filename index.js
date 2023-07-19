@@ -1,14 +1,26 @@
 require("dotenv").config();
+//Express
 const express=require("express");
 
-
+//Mongoose
 const mongoose=require('mongoose');
 
-
+//calling express object creating
 const book=express();
 book.use(express.json());
+//database
 let database=require("./database");
+//models
+//book
+const BookModel=require("./database/book");
 
+//author model
+const authorModel=require("./database/author");
+
+//pubbi model
+
+const pubiModel=require("./database/pubii");
+//mongooose connection
 mongoose.connect(
     process.env.MONGO_URL
 ).then(()=>console.log("abc"));

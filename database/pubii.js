@@ -6,5 +6,5 @@ const pubSchema=mongoose.Schema({
     books:[String]
 });
 
-const pubModel=mongoose.model(pubSchema);
+const pubModel=mongoose.model("pubbi",pubSchema);
 module.exports=pubModel;
