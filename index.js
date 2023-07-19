@@ -1,18 +1,48 @@
+require("dotenv").config();
 const express=require("express");
+
+
+const mongoose=require('mongoose');
+
 
 const book=express();
 book.use(express.json());
 let database=require("./database");
-/*
+
+mongoose.connect(
+    process.env.MONGO_URL
+).then(()=>console.log("abc"));
+
+/* 
+{
+        useNewUrlParser:true,
+        useUnifiedTopology:true,
+        useFindAndModify:false,
+        useCreateIndex:true,
+        
+    },(err)=>{
+        if(err){
+            console.log("error");
+        }else{
+            console.log("No Error");
+        }
+    }
+,{
+    useNewUrlParser:true,
+    useUnifiedTopology:true,
+    useFindAndModify:false,
+    useCreateIndex:true
+}
+mangoo
 Route   /
 Description  Get all the books in the database
 parameter   0
 methods    get
 Access     Public
 */
+console.log("few");
 
-
-
+ 
 book.get("/",(req,res)=>{
     return res.json({books:database.books});
 });
