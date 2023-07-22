@@ -1,7 +1,11 @@
 const mongoose=require("mongoose");
 
 const BookSchema=mongoose.Schema({
-    ISBN:String,
+    ISBN:{
+        type:String,
+        required:true,
+        minLength:6,
+    },
     title:String,
     pubdate:String,
     author:[Number],
