@@ -19,7 +19,8 @@ const authorModel=require("./database/author");
 
 //pubbi model
 
-const pubiModel=require("./database/pubii");
+
+const pubModel = require("./database/pubii");
 //mongooose connection
 mongoose.connect(
     process.env.MONGO_URL
@@ -55,8 +56,10 @@ Access     Public
 console.log("few");
 
  
-book.get("/",(req,res)=>{
-    return res.json({books:database.books});
+book.get("/",async (req,res)=>{
+    const getmodel=await BookModel.find();
+    console.log(getmodel);
+    return res.json(getmodel);
 });
 /*
 Route   /is
@@ -65,12 +68,16 @@ parameter   isbn
 methods    get
 Access     Public
 */
-book.get("/is/:isbn",(req,res)=>{
-    const getbook=database.books.filter((stu)=>stu.ISBN === req.params.isbn);
-    if(getbook.length===0){
-        return res.json({"error":`No book with the given ISBN ${req.params.isbn} is fount`});
+book.get("/is/:isbn",async (req,res)=>{
+    const getbook=await BookModel.findOne({ISBN:req.params.isbn});
+    if(!getbook){
+        res.json({"error":`No book with the given ISBN ${req.params.isbn} is fount`});
     }
-    return res.json({books:getbook});
+    /*const getbook=database.books.filter((stu)=>stu.ISBN === req.params.isbn);
+    //if(getbook.length===0){
+        return res.json({"error":`No book with the given ISBN ${req.params.isbn} is fount`});
+    }*/
+    return res.json(getbook);
 });
 /*
 Route   /c
@@ -79,14 +86,19 @@ parameter   category
 methods    get
 Access     Public
 */
-book.get("/c/:cat",(req,res)=>{
+book.get("/c/:cat",async (req,res)=>{
+    const getbook=await BookModel.findOne({category:req.params.cat});
+    if(!getbook){
+        return res.json({"error":"No data found"});
+    }
+    /*
     const categor=req.params.cat;
     const getcat=database.books.filter((cv)=>cv.category.includes(categor));
     if(getcat.length===0){
         return res.json({data:"NO FOUND"});
 
-    }
-    return res.json({books:getcat});
+    }*/
+    return res.json(getbook);
 });
 /*
 Route   /author
@@ -105,14 +117,18 @@ parameter   isbn
 methods    get
 Access     Public
 */
-book.get("/author/book/:isbn",(req,res)=>{
+book.get("/author/book/:isbn",async (req,res)=>{
     const categor=req.params.isbn;
+    const getcategory=await authorModel.findOne({books:req.params.isbn});
     const getcat=database.author.filter((cv)=>cv.books.includes(categor));
-    if(getcat.length===0){
+    if(!getcategory){
+        return res.json({data:"NO FOUND"});
+    }
+    /*if(getcat.length===0){
         return res.json({data:"NO FOUND"});
 
-    }
-    return res.json({authors:getcat});
+    }*/
+    return res.json(getcategory);
 });
 /*
 Route   /pubbs
@@ -121,8 +137,10 @@ parameter   -
 methods    get
 Access     Public
 */
-book.get("/pubbs",(req,res)=>{
-    return res.json({publications:database.publication});
+book.get("/pubbs",async (req,res)=>{
+    const abc=await pubModel.find();
+    //return res.json({publications:database.publication});
+    return res.json(abc);
 });
 
 /*
@@ -144,17 +162,20 @@ book.get("/pubbs/:id",(req,res)=>{
 
 //post
 //Add a book
-book.post("/bookd/add",(req,res)=>{
+book.post("/bookd/add",async (req,res)=>{
+
     const {newbook}=req.body;
+    const addbook=await BookModel.create(newbook);
     database.books.push(newbook);
-    return res.json({books:database.books});
+    return res.json(addbook);
 });
 
-
-book.post("/authors/add",(req,res)=>{
+//add new author
+book.post("/authors/add",async (req,res)=>{
     const { newauthor }=req.body;
+    const a=await authorModel.create(newauthor);
     database.author.push(newauthor);
-    return res.json({author:database.author});
+    return res.json(a);
 });
 
 
@@ -165,23 +186,56 @@ book.post("/pubbi/add",(req,res)=>{
 });
 
 //PUT
-book.put("/book/update/title/:isbn",(req,res)=>{
 
-    database.books.forEach((bk)=>{
+book.put("/book/update/title/:isbn",async (req,res)=>{
+    const abc=await BookModel.findOneAndUpdate(
+        {
+            ISBN:req.params.isbn
+        },
+        {
+            title:req.body.newtitle
+        },{
+            new:true
+        }
+    );
+    /*database.books.forEach((bk)=>{
       if(bk.ISBN === req.params.isbn) {
         bk.title = req.body.newbooktitle;
         console.log("its running");
         return;
         }
-    });
+    });*/
 
-    return res.json({books:database.books});
+    return res.json({books:abc});
 
 });
 //put 
 //update or add new author
-book.put("/book/update/author/:isbn",(req,res)=>{
-    database.books.forEach((ivb)=>{
+book.put("/book/update/author/:isbn",async (req,res)=>{
+    const updatedbook=await BookModel.findOneAndUpdate(
+        {
+            ISBN:req.params.isbn
+        },
+        {
+            $addToSet:{
+                author:req.body.newauthor
+            }
+        },{
+            new:true
+        }
+    );
+    const authy=await authorModel.findOneAndUpdate(
+        {
+            id:req.body.newauthor
+        },{
+            $addToSet:{
+                books:req.params.isbn
+            }
+        },{
+            new:true
+        }
+    );
+    /*database.books.forEach((ivb)=>{
         if(ivb.ISBN===req.params.isbn){
             return ivb.author.push(parseInt(req.body.newauthorid));
         }
@@ -190,8 +244,8 @@ book.put("/book/update/author/:isbn",(req,res)=>{
         if(abc.id === parseInt(req.body.newauthorid)){
             return abc.books.push(req.params.isbn);
         }
-    });
-    return res.json({books:database.books,authors:database.author});
+    });*/
+    return res.json({books:updatedbook,authors:authy});
 });
 
 /*
@@ -227,12 +281,17 @@ parameter   ISBN
 methods    delete
 Access     Public
 */
-book.delete("/book/delete/:isbn",(req,res)=>{
-    const app=database.books.filter(
+book.delete("/book/delete/:isbn",async (req,res)=>{
+    const app=await BookModel.findOneAndDelete(
+        {
+            ISBN:req.params.isbn
+        }
+    );
+    /*const app=database.books.filter(
         (bk)=>bk.ISBN !== req.params.isbn
     );
-    database.books=app;
-    return res.json({books:database.books});
+    database.books=app;*/
+    return res.json({books:app});
 });
 
 /*
@@ -243,8 +302,32 @@ methods    delete
 Access     Public
 */
 
-book.delete("/book/delete/author/:isbn/:id",(req,res)=>{
-    database.books.forEach((bk)=>{
+book.delete("/book/delete/author/:isbn/:id",async (req,res)=>{
+    const abc=await BookModel.findOneAndUpdate(
+        {
+            ISBN:req.params.isbn
+        },
+        {
+            $pull:{
+                author:parseInt(req.params.id)
+            }
+        },
+        {
+            new:true
+        }
+    );
+    const bcs=await authorModel.findOneAndDelete(
+        {
+            id:parseInt(req.params.id)
+        },{
+            $pull:{
+                books:req.params.isbn
+            }
+        },{
+            new:true
+        }
+    );
+    /*database.books.forEach((bk)=>{
         if(bk.ISBN===req.params.isbn){
             const ath=bk.author.filter((jo)=>jo!==parseInt(req.params.id));
             bk.author=ath;
@@ -259,9 +342,9 @@ book.delete("/book/delete/author/:isbn/:id",(req,res)=>{
             jh.books=ik;
             return ;
         }
-    });
-    return res.json({books:database.books,author:database.author});
-})
+    });*/
+    return res.json({books:abc,author:bcs});
+});
 /*
 Route   /book/delete/author/:isbn
 Description  deleting the author in book and update author api
